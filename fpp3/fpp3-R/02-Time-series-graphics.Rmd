@@ -1,0 +1,259 @@
+---
+title: "fpp3"
+author: "Elad Danovich"
+date: "2024-05-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Time series graphics
+
+```{r}
+library(fpp3)
+```
+## tsibble objects
+```{r}
+mydata <- tsibble(
+  Year = 2015:2019,
+  y = c(123, 39, 78, 52, 110),
+  index = Year)
+mydata
+```
+Or, we can transform tibble to tsibble
+```{r}
+mydata <- tibble(
+  year = 2015:2019,
+  y = c(123, 39, 78, 52, 110)
+) |> as_tsibble(index = year)
+mydata
+```
+
+```{r}
+PBS
+```
+```{r}
+prison <- readr::read_csv("https://OTexts.com/fpp3/extrafiles/prison_population.csv")
+prison
+```
+WE get a tibble! Let's transform it to tsibble, first lets ass a quarter column:
+```{r}
+prison <- prison |>
+  mutate(Quarter = yearquarter(Date))
+prison
+```
+We wont need the Date column:
+```{r}
+prison <- prison |>
+  mutate(Quarter = yearquarter(Date)) |>
+  select(-Date)
+prison
+```
+Lastly, tranform it to tsibble:
+```{r}
+prison <- prison |>
+  mutate(Quarter = yearquarter(Date)) |>
+  select(-Date) |>
+  as_tsibble(key = c(State, Gender, Legal, Indigenous),
+             index = Quarter)
+prison
+```
+
+```{r}
+PBS
+```
+
+
+```{r}
+PBS |>
+  filter(ATC2 == "A10") |>
+  select(Month, Concession, Type, Cost) |>
+  summarise(TotalC = sum(Cost)) |>
+  mutate(Cost = TotalC / 1e6) -> a10
+a10
+```
+
+
+
+## Time plots
+
+autoplot detects the a10 its a tsibble object so it creates a timeplot
+```{r}
+a10 |> 
+  autoplot(Cost) +
+  labs(y = "$ (millions)", title = "Australin antidiabetic drug sales") # + geom_point()
+```
+```{r}
+ansett
+```
+
+```{r}
+ansett |>
+  autoplot(Passengers)
+```
+Too messy...
+
+```{r}
+melsyd_economy <- ansett |>
+  filter(Airports == "MEL-SYD", Class == "Economy") |>
+  mutate(Passengers = Passengers/1000)
+
+autoplot(melsyd_economy, Passengers) +
+  labs(title = "Ansett airlines economy class",
+       subtitle = "Melbourne-Sydney",
+       y = "Passengers ('000)")
+```
+
+
+
+## Time series patterns
+```{r}
+aus_production
+```
+
+```{r}
+aus_production |>
+  filter(year(Quarter) >= 1980) |>
+  autoplot(Electricity) +
+  labs(y="GWh", title = "Australian electricity production")
+```
+trend comp - long term increase
+seasonal comp - regular peaks every four obs
+
+```{r}
+aus_production |>
+  autoplot(Bricks) +
+  labs(y = "million units", title = "Australian clay brick production")
+```
+trend comp - mid50s to mid70s increase
+seasonal comp - there are peaks in summer quarters
+
+
+```{r}
+us_employment
+```
+```{r}
+us_employment |>
+  filter(Title == "Retail Trade", year(Month) >= 1980) |>
+  autoplot(Employed / 1e3) + 
+  labs(y = "MIllion people", title = "Retail employment, USA")
+```
+trend comp - long increasing trend
+seasonal comp - spikes in the summer months
+cyclic comp - periods on increasing and then slow downs
+
+```{r}
+gafa_stock
+```
+```{r}
+gafa_stock |>
+  filter(Symbol == "AMZN", year(Date) >= 2018) |>
+  autoplot(Close) + 
+  labs(y = "$US", title = "Amazon closing stock price")
+```
+Wandering behavior
+
+```{r}
+pelt
+```
+```{r}
+pelt |>
+  autoplot(Lynx) + 
+  labs(y = "Number trapped", title = "Annual canadian Lynx Trappings")
+```
+cyclic pattern
+
+Differences between seasonal and cyclic patterns:
+- seasonal patern constant length; cyclic pattern variable length
+- average length of cycle longer than length of seasonal pattern
+- magnitude of cycle more variable than magnitude of seasonal pattern
+
+
+
+## Seasonal plots
+```{r}
+a10 |> gg_season(Cost, labels = "both") +
+  labs(y = "$ million", title = "Seasonal plot: antidiabetic drug sales")
+```
+```{r}
+beer <- aus_production |>
+  select(Quarter, Beer) |> filter(year(Quarter) >= 1992)
+beer |> autoplot(Beer) +  geom_point() +
+  labs(title = "Australian beer production", y= "Megaliters")
+```
+Spikes in Q4 - beers for summer!
+```{r}
+beer |> gg_season(Beer, labels = "right")
+```
+Now it's more clearly that the spikes in Q4. 
+Also we can see that there is a down trend.
+
+```{r}
+vic_elec
+```
+```{r}
+vic_elec |> autoplot()
+```
+```{r}
+vic_elec |> gg_season(Demand)
+```
+Spikes in Australia's summer months, and little higher demnd in winter time
+```{r}
+vic_elec |> gg_season(Demand, period = "week")
+```
+Weekend demand < weekday demand
+2 spikes in each day(morning and evening)
+```{r}
+vic_elec |> gg_season(Demand, period = "day")
+```
+low demand when sleeping.
+spike when waking up and getting back home from work.
+
+
+
+## Seasonal subseries plots
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
