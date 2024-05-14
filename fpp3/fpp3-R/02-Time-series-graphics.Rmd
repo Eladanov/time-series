@@ -1,5 +1,5 @@
 ---
-title: "fpp3"
+title: "02-Time-series-graphics"
 author: "Elad Danovich"
 date: "2024-05-12"
 output: pdf_document
@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(fpp3)
 ```
+
 ## tsibble objects
 ```{r}
 mydata <- tsibble(
@@ -321,7 +322,7 @@ uptrend + seasonal
 retail |> ACF(Employed, lag_max = 48) |>
   autoplot()
 ```
-all are positive dut to the trend
+all are positive due to the trend
 AND a little picks each 12 months - the seasonality!
 
 ```{r}
@@ -366,10 +367,57 @@ meaning, the series is NOT a white noise series.
 
 ## Exercises
 1.
+```{r}
+aus_production |> autoplot(Bricks)
+```
+3.
+```{r}
+tute1 <- readr::read_csv("/home/elad/git/time-series/fpp3/data/tute1.csv")
+tute1
+```
+```{r}
+mytimeseries <- tute1 |>
+  mutate(Quarter = yearquarter(Quarter)) |>
+  as_tsibble(index = Quarter)
+```
+```{r}
+mytimeseries |>
+  pivot_longer(-Quarter) |>
+  ggplot(aes(x = Quarter, y = value, colour = name)) +
+  geom_line() +
+  facet_grid(name ~ ., scales = "free_y")
+```
+5.
+```{r}
+# install.packages("USgas")
+library(USgas)
+us_total
+```
+```{r}
+us_total_tsibble <- us_total |> as_tsibble(index = year, key = state)
+us_total_tsibble
+```
+```{r}
+us_total_tsibble |> 
+  filter(state %in% c("Maine", "Vermont", "New Hampshire", "Massachusetts", "Connecticut", "Rhode Island")) |>
+  autoplot(y)
+```
+6.
+```{r}
+tourism2 <- readxl::read_excel("/home/elad/git/time-series/fpp3/data/tourism.xlsx")
+tourism2
+```
+```{r}
+tourism2 |>
+  mutate(Quarter = yearquarter(Quarter)) |>
+  as_tsibble(index = Quarter, key = c(Region,State,Purpose))
+```
 
-
-
-
+9.
+3-D -- up trend + peak in lag12
+2-A -- high corr each ~12 months and low corr each ~6 months (probably more accidents in winter time)
+4-C -- every 10 years there is a low so hih corr in 10
+1-B -- ???
 
 
 

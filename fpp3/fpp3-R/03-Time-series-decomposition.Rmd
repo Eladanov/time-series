@@ -1,0 +1,45 @@
+---
+title: "03-Time-series-decomposition"
+author: "Elad Danovich"
+date: "2024-05-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Time series decomposition
+
+```{r}
+library(fpp3)
+```
+
+## Transformations and adjustments
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
