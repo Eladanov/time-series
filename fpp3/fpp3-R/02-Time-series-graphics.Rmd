@@ -252,6 +252,124 @@ holidays |>
 
 
 
+## Scatterplots
+```{r}
+vic_elec_day_type <-  vic_elec |>
+  filter(year(Time) == 2014) |>
+  mutate(Day_Type = case_when(
+    Holiday ~ "Holiday",
+    wday(Date) %in% 2:6 ~ "Weekday",
+    TRUE ~ "Weekend"))
+vic_elec_day_type
+```
+```{r}
+vic_elec_day_type |> autoplot(Demand)
+```
+```{r}
+vic_elec_day_type |> autoplot(Temperature)
+```
+```{r}
+vic_elec_day_type |>
+  ggplot(aes(x = Temperature, y = Demand, colour = Day_Type)) +
+  geom_point() +
+  labs(x = "Temperature (C)", y = "Electricity demand (GW)")
+```
+Non linear relationship
+increase when colder and when warmer
+the shape is the same for weekdays and weekend
+higher demand in weekdays
+
+```{r}
+us_change |> GGally::ggpairs(columns = 2:6)
+```
+
+
+
+## Lag plots
+```{r}
+new_production <- aus_production |>
+  filter(year(Quarter) >= 1992)
+new_production
+```
+```{r}
+new_production |> gg_lag(Beer, geom = "point")
+```
+Each grpah shows y_t plotted against y_t-k for different values of k.
+lag4 and lag8 with strong positive corr since this is quartly seasonality.
+
+
+
+## Autocorrelation
+The autocorrealtions are the correations associated with the above scatterplot.
+r1 - is the correlation of lag1 and so on...
+```{r}
+new_production |> ACF(Beer, lag_max = 9)
+```
+Like we said in the scatterplot section lag4 and lag8 with high positive corr
+```{r}
+new_production |> ACF(Beer, lag_max = 9) |> autoplot()
+```
+correlogram
+cool animation in the video
+```{r}
+retail <- us_employment |>
+  filter(Title == "Retail Trade", year(Month) >= 1980)
+retail |> autoplot(Employed)
+```
+uptrend + seasonal
+```{r}
+retail |> ACF(Employed, lag_max = 48) |>
+  autoplot()
+```
+all are positive dut to the trend
+AND a little picks each 12 months - the seasonality!
+
+```{r}
+google_2015 <- gafa_stock |>
+  filter(Symbol == "GOOG", year(Date) == 2015) |>
+  select(Date, Close)
+google_2015
+```
+```{r}
+google_2015 |> autoplot(Close)
+```
+```{r}
+google_2015 |>
+  ACF(Close, lag_max=100) |> autoplot()
+```
+
+
+
+## White noise
+```{r}
+set.seed(30)
+wn <-  tsibble(t = 1:50, y = rnorm(50), index = t)
+wn |> autoplot(y)
+```
+```{r}
+wn |> ACF(y) |> autoplot()
+```
+```{r}
+pigs <- aus_livestock |>
+  filter(State == "Victoria", Animal =="Pigs", year(Month) >= 2014)
+pigs |> autoplot(Count / 1e3) +
+  labs(y = "Thousands", title = "Number of pigs slaughtered in Victoria")
+```
+test for white noise
+```{r}
+pigs |> ACF(Count) |> autoplot()
+```
+2 spikes outside the range, indicate some slight seasonality for lag 2 and 12
+meaning, the series is NOT a white noise series.
+
+
+
+## Exercises
+1.
+
+
+
+
 
 
 
