@@ -87,6 +87,31 @@ us_retail_emp |>
  
  
 ## Moving averages
+average of nearby points; 3-MA: T_t = (y_t-1 + y_t + t_t+1)/3
+The average eliminates some of the randomness in the data, leaving a smooth trend-cycle component
+If the seasonal period is even and of order m, we use a 2×m-MA to estimate the trend-cycle. If the seasonal period is odd and of order m, we use a m-MA to estimate the trend-cycle. 
+```{r}
+global_economy |>
+  filter(Country == "Australia") |>
+  autoplot(Exports) +
+  labs(y = "% of GDP", title = "Total Australian exports")
+```
+A moving average of the same length as the season removes the seasonal pattern:
+for quarterly data: use a 2X4 MA
+for monthly data: use a 2X12 MA
+```{r}
+us_retail_employment_ma <- us_retail_emp |>
+  mutate(
+    `12-MA` = slider::slide_dbl(Employed, mean,
+                .before = 5, .after = 6, .complete = TRUE),
+    `2x12-MA` = slider::slide_dbl(`12-MA`, mean,
+                .before = 1, .after = 0, .complete = TRUE)
+  )
+us_retail_employment_ma |>
+  autoplot(Employed, colour = "gray") +
+  geom_line(aes(y = `2x12-MA`), colour = "#D55E00") +
+  labs(y = "Persons (thousands)", title = "Total employment in US retail")
+```
 
 
 
