@@ -129,13 +129,54 @@ us_retail_emp |>
 
 
 ## Methods used by official statistics agencies
+restricted to monthly or quarterly data
 ```{r}
 x11_dcmp <- us_retail_emp |>
   model(x11 = X_13ARIMA_SEATS(Employed ~ x11())) |>
   components()
-autoplot(x11_dcmp) +
-  labs(title = "Decomposition of total US retail employment using X-11.")
+autoplot(x11_dcmp)
 ```
+```{r}
+seats_dcmp <- us_retail_emp |>
+  model(seats = X_13ARIMA_SEATS(Employed ~ seats())) |>
+  components()
+autoplot(seats_dcmp)
+```
+
+
+
+
+## STL decomposition
+will handle any type of seasonality
+only additive - but can take logs to multi
+```{r}
+us_retail_emp |>
+  model(STL(Employed ~ season(window = 9), robust = TRUE)) |>
+  components() |>
+  autoplot() + labs(title = "STL decomposition: US retail employment")
+```
+```{r}
+us_retail_emp |>
+  model(STL(Employed ~ season(window = 9) + trend(window = 500), robust = TRUE)) |>
+  components() |>
+  autoplot() + labs(title = "STL decomposition: US retail employment")
+```
+the trend window too large so the reminder takes it.
+trend(window = ?) controls wiggliness of trend component.
+season(window = ?) controls variation on seasonal component.
+season(window = 'periodic') is equivalent to an infinite window.
+the deafult works pretty good:
+```{r}
+us_retail_emp |>
+  model(STL(Employed)) |>
+  components() |>
+  autoplot()
+```
+
+
+
+
+## Exercises
 
 
 
