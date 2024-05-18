@@ -116,6 +116,30 @@ us_retail_employment_ma |>
 
 
 
+## Classical decomposition
+```{r}
+us_retail_emp |>
+  model(classical_decomposition(Employed, type = "additive")) |>
+  components() |>
+  autoplot() + xlab("Year") +
+  ggtitle("Classical additive decomposition of total US retail employment")
+```
+
+
+
+
+## Methods used by official statistics agencies
+```{r}
+x11_dcmp <- us_retail_emp |>
+  model(x11 = X_13ARIMA_SEATS(Employed ~ x11())) |>
+  components()
+autoplot(x11_dcmp) +
+  labs(title = "Decomposition of total US retail employment using X-11.")
+```
+
+
+
+
 
 
 
