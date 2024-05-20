@@ -16,6 +16,33 @@ library(fpp3)
 ```
 
 
+## Some simple tatistics
+```{r}
+tourism |>
+  features(Trips, list(mean = mean)) |>
+  arrange(mean)
+```
+```{r}
+tourism |> features(Trips, quantile)
+```
+
+
+
+## ACF Features
+```{r}
+tourism |> features(Trips, feat_acf)
+```
+the first autocorrelation coefficient from the original data;
+the sum of squares of the first ten autocorrelation coefficients from the original data;
+the first autocorrelation coefficient from the differenced data;
+the sum of squares of the first ten autocorrelation coefficients from the differenced data;
+the first autocorrelation coefficient from the twice differenced data;
+the sum of squares of the first ten autocorrelation coefficients from the twice differenced data;
+For seasonal data, the autocorrelation coefficient at the first seasonal lag is also returned.
+
+
+
+## STL Features
 
 
 
