@@ -15,8 +15,44 @@ library(fpp3)
 ```
 
 ## A tidy forecasting workflow
+1. Preparing data
+2. Data visualization
+3. Specifying a model
+4. Model estimation
+5. Accuracy and performance evaluation
+6. Producing forecasts
+```{r}
+gdppc <-  global_economy |>
+  mutate(GDP_per_capita = GDP / Population) |>
+  select(Year, Country, GDP, Population, GDP_per_capita)
+gdppc
+```
 
+```{r}
+gdppc |>
+  filter(Country == "Sweden") |>
+  autoplot(GDP_per_capita) +
+  labs(title = "GDP per capita for sweden", y = "$US")
+```
 
+```{r}
+fit <-  gdppc |>
+  model(trend_model = TSLM(GDP_per_capita ~ trend()))
+fit
+```
+mabel = model table, each cell corresponds to fitted model.
+
+```{r}
+fit |> forecast(h = "3 years")
+```
+fable = forecast table with point forecasts and distributions.
+
+```{r}
+fit |>
+  forecast(h = "3 years") |>
+  filter(Country == "Sweden") |>
+  autoplot(gdppc) + labs(title = "GDP per capita for Sweden", y = "$US")
+```
 
 
 
