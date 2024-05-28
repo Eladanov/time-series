@@ -56,13 +56,56 @@ fit |>
 
 
 
+## Some simple forecasting methods
+1. forecast the average (mean(y))
+2. forecast the last observed value (naive(y))
+3. forecast equal to last value from same season (snaive, y ~ lag(m))
+4. forecast equal to last value plus average change (rw, y  ~ drift())
 
+```{r}
+brick_fit <-  aus_production |>
+  filter(!is.na(Bricks)) |>
+  model(
+    Seasonal.naive = SNAIVE(Bricks),
+    Naive = NAIVE(Bricks),
+    Drift = RW(Bricks ~ drift()),
+    Mean = MEAN(Bricks)
+  )
+brick_fit
+```
 
+```{r}
+bricks_fc <-  brick_fit |>
+  forecast(h = "5 years")
+bricks_fc
+```
 
+```{r}
+bricks_fc |>
+  autoplot(aus_production, level = NULL) +
+  labs(title = "Clay brick prduction in Australia", y = "Millions of Bricks") +
+  guides(colour = guide_legend(title = "Forecast"))
+```
 
+```{r}
+# Extract training data
+fb_stock <-  gafa_stock |>
+  filter(Symbol == "FB") |>
+  mutate(trading_day = row_number()) |>
+  update_tsibble(index = trading_day, regular = TRUE) #since there are days that the market is close the naive model will pop an error, for example for monday there                                                            isnt a data from sunday to forecast
 
-
-
+# Specify, estimate and forecast
+fb_stock |>
+  model(
+    Mean = MEAN(Close),
+    Naive = NAIVE(Close),
+    Drift = RW(Close ~ drift())
+  ) |>
+  forecast(h = 42) |>
+  autoplot(fb_stock, level = NULL) +
+  labs(title = "Facebook closing stock price", y = "$US") + 
+  guides(colour = guide_legend(title = "Forecas"))
+```
 
 
 
