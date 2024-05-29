@@ -108,6 +108,87 @@ fb_stock |>
 ```
 
 
+## Fitted values and residuals
+y^_t|t-1 is the forecast of y_t based on observations y_1,...,y_t-1
+e_t = y_t - y^_t|t-1
+1. e_ t are uncorrelated
+2. e_t have mean zero
+3. e_t have constant variance
+4. e_t are normally distributed
+
+
+## Residual diagnostics
+```{r}
+fb_stock |> autoplot(Close)
+```
+
+```{r}
+fit <- fb_stock |> model(NAIVE(Close))
+augment(fit)
+```
+
+```{r}
+augment(fit) |>
+  ggplot(aes(x = trading_day)) +
+  geom_line(aes(y = Close, colour = "Data")) +
+  geom_line(aes(y = .fitted, colour = "Fitted"))
+```
+
+```{r}
+augment(fit) |>
+  filter(trading_day > 1100) |>
+  
+  ggplot(aes(x = trading_day)) +
+  geom_line(aes(y = Close, colour = "Data")) +
+  geom_line(aes(y = .fitted, colour = "Fitted"))
+```
+
+```{r}
+augment(fit) |>
+  autoplot(.resid) +
+  labs(y = "$US", title = "Residuals from naive method")
+```
+center around zero :)
+but variance is grater as trading_day increase
+
+```{r}
+augment(fit) |>
+          ggplot(aes(x = .resid)) +
+  geom_histogram(bins = 150) +
+  labs(title = "Histogram of residuals")
+```
+
+```{r}
+augment(fit) |>
+  ACF(.resid) |>
+  autoplot() + labs(title = "ACF of residuals")
+```
+
+```{r}
+gg_tsresiduals(fit)
+```
+all together - nice!
+
+Box-Pierce test:
+Q = T * sigma(r^2_k) from k=1 to l, where l is max lag being cosidered and T is number of observations
+
+Ljung-Box test:
+---
+
+if data are white noise, then Q* has chi^2 distribution with l degrees of freedom
+lag = l
+
+```{r}
+augment(fit) |>
+  features(.resid, ljung_box, lag = 10)
+```
+lb_stat  = Q*
+The p_value is the probability of getting a Q* values as big as this if the residuals were really white noise
+we reject the hypothesis of white noise if this p_value is less 0.05
+so the above residuals are not white noise
+
+
+
 
 
 
